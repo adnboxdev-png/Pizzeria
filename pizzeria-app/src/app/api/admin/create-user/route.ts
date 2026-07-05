@@ -16,11 +16,13 @@ export async function POST(req: NextRequest) {
     if (callerError || !callerData.user) {
       return NextResponse.json({ error: "Sesión inválida." }, { status: 401 });
     }
-    const { data: callerProfile } = await supabaseAdmin
+    const { data: callerProfileRaw } = await supabaseAdmin
       .from("profiles")
       .select("role, active")
       .eq("id", callerData.user.id)
       .single();
+
+    const callerProfile = callerProfileRaw as unknown as { role: string; active: boolean } | null;
 
     if (!callerProfile || callerProfile.role !== "admin" || !callerProfile.active) {
       return NextResponse.json({ error: "Solo un administrador puede crear usuarios." }, { status: 403 });
